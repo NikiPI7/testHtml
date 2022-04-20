@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nik test</title>
+</head>
+<body>
+
+<label id="timeLabel"> время будет тут </label>
+<br>
+<input id="currentDateTimeButton" title="click" type="button" value="текущее время"/>
+<br>
+<input id="userName"/> <label>имя пользователя</label>
+<br>
+<input id="createUserButton" title="создать пользователя" type="button" value="создать"/>
+<br>
+<input id="deleteUserButton" title="удалить пользователя" type="button" value="удалить"/>
+<br>
+<label> Список пользователей </label>
+<ul id="userList"/>
+<script style="display: none;">
+    let currentDateTimeButton = document.getElementById("currentDateTimeButton");
+    let createUserButton = document.getElementById("createUserButton");
+    let deleteUserButton = document.getElementById("deleteUserButton");
+
+    currentDateTimeButton.addEventListener('click', getCurrentDateTime);
+    createUserButton.addEventListener('click', createUser);
+    deleteUserButton.addEventListener('click', deleteUser);
+
+    getUsers();
+
+    function getCurrentDateTime() {
+        let xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                let timeLabel = document.getElementById("timeLabel");
+                timeLabel.innerText = xhr.responseText;
+            }
+        }
+        xhr.open("GET", "https://testapifromuron.herokuapp.com/api/currentTime", true);
+        xhr.send();
+    }
+
+    function createUser() {
+        let xmlHttp = new XMLHttpRequest();
+        xmlHttp.onload = function () {
+            if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+                getUsers();
+            }
+        }
+        let userName = document.getElementById("userName");
+        let data = JSON.stringify({"userName": userName.value});
+        xmlHttp.open("POST", "https://testapifromuron.herokuapp.com/api/createUser", true);
+        xmlHttp.setRequestHeader("Content-Type", "application/json");
+        xmlHttp.send(data);
+    }
+
+    function deleteUser() {
+        let xmlHttp = new XMLHttpRequest();
+        xmlHttp.onload = function () {
+            if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+                getUsers();
+            }
+        }
+        let userName = document.getElementById("userName");
+        let url = new URL("https://testapifromuron.herokuapp.com/api/deleteUser");
+        url.searchParams.append("userName", userName.value);
+        xmlHttp.open("GET", url, true);
+        xmlHttp.send();
+    }
+
+    function getUsers() {
+        let ul = document.getElementById('userList');
+        ul.innerHTML="";
+        let xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                let r = JSON.parse(xhr.responseText);
+                for (let i = 0; i < r.length; i++) {
+                    addToUserList(r[i]);
+                }
+            }
+        }
+        xhr.open("GET", "https://testapifromuron.herokuapp.com/api/users", true);
+        xhr.send();
+    }
+
+    function addToUserList(name) {
+        let li = document.createElement('li');
+        li.innerHTML = name;
+        let ul = document.getElementById('userList');
+        ul.appendChild(li);
+    }
+
+</script>
+</body>
+</html>
